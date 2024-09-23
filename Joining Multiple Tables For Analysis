@@ -1,0 +1,20 @@
+select pls18.obereg, region_code.region_name, region_code.obereg,
+		sum(pls18.visits) as visits_2018,
+		sum(pls17.visits) as visits_2017,
+		sum(pls16.visits) as visits_2016,
+		round((sum(pls18.visits)::numeric - sum(pls17.visits))
+					/sum(pls17.visits) * 100, 1) as chg_2018_17,
+		round((sum(pls17.visits)::numeric - sum(pls16.visits))
+					/sum(pls16.visits) * 100, 1) as chg_2017_16
+
+from pls_fy2018_libraries pls18
+	join pls_fy2017_libraries pls17 on pls18.fscskey = pls17.fscskey
+	join pls_fy2016_libraries pls16 on  pls18.fscskey = pls16.fscskey
+	join region_code on region_code.obereg = pls18.obereg
+
+where pls18.visits >= 0
+	and pls17.visits >= 0
+	and pls16.visits >= 0
+
+group by pls18.obereg, region_name, region_code.obereg
+order by chg_2018_17 desc;
